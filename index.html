@@ -2,10 +2,11 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>BÀI TẬP TIẾNG ANH GS</title>
     <style>
         /* --- CÀI ĐẶT CHUNG --- */
+        * { box-sizing: border-box; }
         body {
             font-family: Arial, sans-serif;
             max-width: 816px;
@@ -29,7 +30,6 @@
             border-radius: 12px;
             box-shadow: 0 2.4px 6px rgba(0,0,0,0.1);
             margin-bottom: 24px;
-            box-sizing: border-box;
         }
 
         /* --- CÁC NÚT BẤM GIAO DIỆN CHÍNH --- */
@@ -58,7 +58,6 @@
             border: 1px solid #ddd;
             border-radius: 6px;
             font-size: 19.2px;
-            box-sizing: border-box;
         }
         button { color: white; border: none; cursor: pointer; }
         button:hover { opacity: 0.9; }
@@ -66,31 +65,61 @@
         .start-btn { background-color: #4CAF50; }
         .back-btn { background-color: #607d8b; }
         
-        /* --- QUIZ SCREEN --- */
+        /* --- QUIZ SCREEN UPDATE --- */
+        /* Tiêu đề màn hình */
+        #quiz-title.screen-title {
+            margin-bottom: 12px !important; /* Giảm khoảng cách dưới tiêu đề */
+            font-size: 24px; /* Thu nhỏ tiêu đề chút cho vừa vặn */
+        }
+
+        /* Thanh thời gian */
         .timer-container {
             width: 100%;
             background-color: #f1f1f1;
             border-radius: 6px;
-            margin-bottom: 24px;
+            margin-bottom: 10px !important; /* Giảm khoảng cách */
+            height: 18px; /* Giảm chiều cao (từ 24px xuống ~18px - giảm ~25%) */
         }
         .timer-bar {
-            height: 24px;
+            height: 100%; /* Lấp đầy container */
             background-color: #FFD700;
             border-radius: 6px;
             width: 100%;
-            transition: width 0.1s linear;
+            transition: width 0.1s linear, background-color 0.3s;
         }
-        .question {
-            font-size: 21.6px;
+        
+        /* Hàng thông tin: Số câu và Chuỗi đúng (Gộp 1 hàng) */
+        .stats-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 10px !important; /* Giảm khoảng cách dưới hàng thông tin */
+        }
+
+        .question-counter, .streak {
+            margin: 0; /* Reset margin để canh lề flex */
             font-weight: bold;
-            margin-bottom: 18px;
+            font-size: 16px; /* Thu nhỏ chữ chút cho vừa màn hình điện thoại */
+            color: #555;
+        }
+        
+        /* Tô màu nổi bật cho số chuỗi đúng */
+        .streak { color: #FF9800; }
+        .question-counter { color: #2196F3; }
+
+        .question {
+            font-size: 19.2px; /* Giảm nhẹ từ 21.6px */
+            font-weight: bold;
+            margin-bottom: 8px !important; /* Giảm khoảng cách */
             text-align: center;
         }
+
         .word-container {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 18px 0;
+            margin: 10px 0 16px 0 !important; /* Giảm khoảng cách trên dưới */
         }
         .word {
             font-size: 26.4px;
@@ -98,23 +127,24 @@
             color: #2c3e50;
             text-align: center;
         }
-        .options { display: flex; flex-direction: column; }
+
+        .options { display: flex; flex-direction: column; gap: 6px; } /* Thêm gap nhỏ giữa các option */
         .option {
             padding: 14.4px;
-            margin: 6px 0;
+            margin: 0; /* Bỏ margin riêng, dùng gap của flex */
             background-color: #f9f9f9;
             border: 1px solid #ddd;
             border-radius: 6px;
             cursor: pointer;
             text-align: left;
             font-size: 19.2px;
+            transition: background-color 0.2s;
         }
         .option:hover { background-color: #e9e9e9; }
-        .streak { text-align: center; margin-bottom: 18px; font-weight: bold; font-size: 19.2px; }
-        .correct { background-color: #4CAF50; color: white; }
-        .incorrect { background-color: #f44336; color: white; }
-        .hidden { display: none; }
-        .question-counter { text-align: center; margin-bottom: 12px; font-weight: bold; font-size: 19.2px; }
+        
+        .correct { background-color: #4CAF50; color: white; border-color: #4CAF50; }
+        .incorrect { background-color: #f44336; color: white; border-color: #f44336; }
+        .hidden { display: none !important; }
         
         /* --- LOGIN SCREEN --- */
         .form-group { margin-bottom: 18px; }
@@ -192,10 +222,10 @@
         /* --- CẬP NHẬT TIÊU ĐỀ THỨ 2 --- */
         #result-test-type {
             text-align: center;
-            font-weight: bold; /* In đậm */
-            color: #2196F3; /* Màu xanh dương (Blue) */
+            font-weight: bold;
+            color: #2196F3;
             margin-bottom: 18px;
-            font-size: 20.2px; /* Tăng 20% so với 16.8px gốc */
+            font-size: 20.2px;
         }
 
         /* --- Ô SỐ 1: CHỨA TÊN, BIỂU ĐỒ, NGÀY --- */
@@ -230,28 +260,23 @@
         .donut-chart-svg {
             width: 100%;
             height: 100%;
-            /* Xoay -90deg để điểm bắt đầu (0 degree của SVG) nằm ở vị trí 12 giờ */
             transform: rotate(-90deg);
             transform-origin: center;
         }
 
-        /* Đường tròn nền (xám) */
         .circle-bg {
             fill: none;
             stroke: #e0e0e0;
             stroke-width: 7.2;
         }
 
-        /* Đường tròn hiển thị % (màu) */
         .circle-progress {
             fill: none;
             stroke-width: 7.2;
             stroke-linecap: butt;
-            /* pathLength="100" giúp tính toán % trực tiếp */
             transition: stroke-dasharray 1s ease-out;
         }
 
-        /* Chữ nằm giữa biểu đồ */
         .chart-center-content {
             position: absolute;
             top: 50%;
@@ -276,7 +301,6 @@
             font-weight: bold;
         }
 
-        /* Màu ngày tháng thành xanh đen in đậm */
         .res-date-new {
             font-size: 15.6px;
             color: #1a237e;
@@ -328,7 +352,6 @@
             letter-spacing: 0.6px;
         }
 
-        /* Màu sắc cho các thông số */
         .stat-start .stat-value-text { color: #2196F3; }
         .stat-start .stat-icon-box svg { fill: #2196F3; }
 
@@ -411,34 +434,110 @@
             }
 
             #result-test-type {
-                font-size: 24.2px; /* Tăng 20% cho màn hình lớn */
+                font-size: 24.2px;
             }
         }
 
-        /* --- RESPONSIVE MOBILE --- */
+        /* --- RESPONSIVE MOBILE (TỐI ƯU GIAO DIỆN ĐIỆN THOẠI) --- */
         @media (max-width: 480px) {
             body {
                 max-width: 100%;
-                padding: 20px;
+                padding: 10px; /* Giảm padding thân trang */
                 font-size: 16px;
             }
             
             .grade-screen, .login-screen, .quiz-screen, .result-screen {
-                padding: 20px;
+                padding: 15px; /* Giảm padding các màn hình */
                 border-radius: 10px;
-                margin-bottom: 20px;
+                margin-bottom: 15px;
             }
             
+            /* Grade Screen Buttons */
             .grade-btn {
-                padding: 15px;
-                font-size: 16px;
-            }
-            
-            input, button, select {
                 padding: 12px;
                 font-size: 16px;
+                margin: 6px 0;
             }
             
+            /* Login Screen Specifics */
+            .screen-title {
+                font-size: 20px !important; /* Thu nhỏ tiêu đề */
+                margin-bottom: 10px !important; /* Giảm khoảng cách dưới tiêu đề */
+                line-height: 1.2;
+            }
+
+            .form-group {
+                margin-bottom: 8px !important; /* Giảm khoảng cách giữa các trường */
+            }
+            
+            .form-group label {
+                font-size: 14px; /* Nhỏ nhãn label */
+                margin-bottom: 2px;
+            }
+
+            input, button, select {
+                padding: 10px !important; /* Giảm chiều cao ô nhập liệu */
+                margin: 4px 0 !important; /* Giảm lề trên dưới */
+                font-size: 16px;
+            }
+            
+            .start-btn {
+                margin-top: 5px;
+            }
+
+            .test-buttons-container {
+                margin: 10px 0 !important; /* Giảm khoảng cách lưới nút */
+                gap: 6px; /* Giảm khoảng cách giữa các nút */
+            }
+
+            .test-btn {
+                padding: 8px; /* Giảm padding nút */
+                font-size: 13px; /* Nhỏ chữ nút test */
+                font-weight: bold;
+            }
+            
+            .test-info {
+                font-size: 12px;
+                margin-top: 8px;
+            }
+
+            .back-btn {
+                margin-top: 5px;
+                padding: 10px;
+            }
+
+            /* Contact Info adjustments */
+            .contact-info {
+                padding: 12px;
+                margin-top: 10px;
+            }
+            .contact-info h3 { font-size: 16px; margin-bottom: 8px; }
+            .contact-info p { font-size: 13px; }
+            
+            /* Quiz Screen Elements - Mobile Compact */
+            #quiz-title.screen-title {
+                font-size: 18px; 
+                margin-bottom: 8px !important;
+            }
+
+            .timer-container {
+                height: 14px; /* Thanh thời gian mỏng hơn trên mobile */
+                margin-bottom: 8px !important;
+            }
+            
+            .stats-info-row {
+                margin-bottom: 8px !important;
+            }
+            
+            .question-counter, .streak {
+                font-size: 14px; /* Chữ nhỏ hơn trên mobile */
+            }
+
+            .question {
+                font-size: 16px;
+                margin-bottom: 6px !important;
+            }
+
             .word {
                 font-size: 22px;
             }
@@ -448,6 +547,7 @@
                 font-size: 16px;
             }
             
+            /* Result Screen Compact */
             .res-name-new {
                 font-size: 24px;
             }
@@ -464,7 +564,7 @@
                 font-size: 17px;
             }
             .stat-label-text { 
-                font-size: 12px;
+                font-size: 11px;
             }
             .stat-icon-box svg {
                 width: 24px;
@@ -515,8 +615,6 @@
                 <input type="text" id="username" placeholder="Tên của bạn">
             </div>
             
-            
-            
             <div class="form-group">
                 <label for="unit-select">Chọn Unit làm bài:</label>
                 <select id="unit-select"></select>
@@ -526,7 +624,7 @@
                 <select id="question-count"></select>
             </div>
             <button id="start-btn" class="start-btn">Bắt đầu</button>
-<div class="test-buttons-container">
+            <div class="test-buttons-container">
                 <button id="test-u1-u3-btn" class="test-btn test-u1-u3">TEST U1-U3</button>
                 <button id="test-u4-u6-btn" class="test-btn test-u4-u6">TEST U4-U6</button>
                 <button id="test-u1-u6-btn" class="test-btn test-u1-u6">TEST U1-U6</button>
@@ -538,14 +636,21 @@
             <div class="test-info">Mỗi bài kiểm tra sẽ có 40 câu hỏi ngẫu nhiên</div>
             <button id="back-to-grade-btn" class="back-btn">Quay lại</button>
         </div>
+
         <!-- Quiz Screen -->
         <div id="quiz-screen" class="quiz-screen hidden">
             <h2 id="quiz-title" class="screen-title"></h2>
+            
             <div class="timer-container">
                 <div id="timer-bar" class="timer-bar"></div>
             </div>
-            <div id="question-counter" class="question-counter">Câu 1/10</div>
-            <div id="streak" class="streak">Chuỗi đúng: 0</div>
+
+            <!-- Gộp Question Counter và Streak vào cùng 1 hàng -->
+            <div class="stats-info-row">
+                <div id="question-counter" class="question-counter">Câu 1/10</div>
+                <div id="streak" class="streak">Chuỗi đúng: 0</div>
+            </div>
+            
             <div class="question">Chọn đáp án đúng:</div>
             <div class="word-container">
                 <div id="word" class="word"></div>
@@ -618,7 +723,7 @@
                     <div class="stat-box stat-streak">
                         <div class="stat-icon-box">
                             <svg viewBox="0 0 24 24">
-                                <path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/>
+                                <path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.22-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/>
                             </svg>
                         </div>
                         <div id="new-res-streak" class="stat-value-text">0</div>
@@ -667,8 +772,8 @@
     </div>
 
     <script>
-        // [PHẦN JAVASCRIPT GIỮ NGUYÊN KHÔNG THAY ĐỔI]
-  
+        // [PHẦN JAVASCRIPT GIỮ NGUYÊN KHÔNG THAY ĐỔI CHỨC NĂNG]
+        
         // Question data for all grades and units
         const allQuestions = {
             // Grade 6 questions (from original file)
@@ -6778,6 +6883,7 @@
             }
         };
 
+
         
         const unitTitles = {
             E6: {
@@ -7053,6 +7159,7 @@
             timerBar.style.backgroundColor = '#FFD700';
             timer = setInterval(() => {
                 timeLeft -= 0.1;
+                // Giảm chiều rộng từ 100% xuống 0%
                 timerBar.style.width = `${(timeLeft / 15) * 100}%`;
                 if (timeLeft <= 5) timerBar.style.backgroundColor = '#FF6347';
                 if (timeLeft <= 0) {
